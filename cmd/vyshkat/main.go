@@ -1,8 +1,11 @@
 package main
 
-import "vyshkat/internal/park"
+import (
+	"vyshkat/internal/app"
+	"vyshkat/internal/park"
+)
 
 func main() {
-	container := park.NewContainer(park.RegularService{})
-	park.RunDemo(container.Park)
+	container := app.NewContainer(park.RegularService{})
+	app.RunDemo(container.Park)
 }

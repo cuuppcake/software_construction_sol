@@ -1,4 +1,4 @@
-package park
+package item
 
 type Helmet struct {
 	name   string

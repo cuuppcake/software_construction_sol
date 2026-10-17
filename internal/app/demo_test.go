@@ -1,9 +1,12 @@
-package park
+package app
 
-import "testing"
+import (
+	"testing"
+	"vyshkat/internal/park"
+)
 
 func TestRunDemo(t *testing.T) {
-	p := NewContainer(RegularService{}).Park
+	p := NewContainer(park.RegularService{}).Park
 	RunDemo(p)
 
 	if p.TransportCount() != 3 {

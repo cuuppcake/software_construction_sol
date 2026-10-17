@@ -1,9 +1,14 @@
-package park
+package tests
 
-import "testing"
+import (
+	"testing"
+	"vyshkat/internal/park"
+	"vyshkat/internal/park/item"
+	"vyshkat/internal/park/transport"
+)
 
 func TestEmptyPark(t *testing.T) {
-	p := NewPark(RegularService{})
+	p := park.NewPark(park.RegularService{})
 	if p.TransportCount() != 0 || p.ItemCount() != 0 || p.TotalEnergy() != 0 {
 		t.Fatal("empty park must have zero counts and energy")
 	}
@@ -13,18 +18,18 @@ func TestEmptyPark(t *testing.T) {
 }
 
 func TestMixedInventory(t *testing.T) {
-	p := NewPark(RegularService{})
-	vehicles := []Transport{
-		NewScooter("Scooter", 1, 0.5, 5),
-		NewBicycle("Bicycle", 2, 6),
-		NewElectricBicycle("Electric", 3, 0.8, 10),
+	p := park.NewPark(park.RegularService{})
+	vehicles := []park.Transport{
+		transport.NewScooter("Scooter", 1, 0.5, 5),
+		transport.NewBicycle("Bicycle", 2, 6),
+		transport.NewElectricBicycle("Electric", 3, 0.8, 10),
 	}
 	for _, vehicle := range vehicles {
 		if err := p.AddTransport(vehicle); err != nil {
 			t.Fatal(err)
 		}
 	}
-	items := []InventoryItem{NewHelmet("Helmet", 4), NewChargingStation("Station", 5, 1.2)}
+	items := []park.InventoryItem{item.NewHelmet("Helmet", 4), item.NewChargingStation("Station", 5, 1.2)}
 	for _, item := range items {
 		if err := p.AddItem(item); err != nil {
 			t.Fatal(err)
@@ -55,21 +60,21 @@ func TestMixedInventory(t *testing.T) {
 		}
 	}
 	copyOfInventory := p.Inventory()
-	copyOfInventory[0] = NewHelmet("Replacement", 99)
+	copyOfInventory[0] = item.NewHelmet("Replacement", 99)
 	if p.Inventory()[0].GetName() != "Scooter" {
 		t.Fatal("changing the returned slice must not change park inventory")
 	}
 }
 
 func TestFailedAdditionsPreserveInventory(t *testing.T) {
-	p := NewPark(RegularService{})
-	if err := p.AddTransport(NewScooter("Existing", 1, 0.5, 8)); err != nil {
+	p := park.NewPark(park.RegularService{})
+	if err := p.AddTransport(transport.NewScooter("Existing", 1, 0.5, 8)); err != nil {
 		t.Fatal(err)
 	}
-	for _, vehicle := range []Transport{
-		NewBicycle("Duplicate", 1, 7),
-		NewBicycle("Invalid ease", 2, 0),
-		NewElectricBicycle("Broken", 3, -1, 7),
+	for _, vehicle := range []park.Transport{
+		transport.NewBicycle("Duplicate", 1, 7),
+		transport.NewBicycle("Invalid ease", 2, 0),
+		transport.NewElectricBicycle("Broken", 3, -1, 7),
 	} {
 		if err := p.AddTransport(vehicle); err == nil {
 			t.Fatalf("accepted invalid transport %q", vehicle.GetName())
@@ -82,34 +87,34 @@ func TestFailedAdditionsPreserveInventory(t *testing.T) {
 			t.Fatal("failed addition replaced existing transport")
 		}
 	}
-	if err := p.AddItem(NewHelmet("Duplicate", 1)); err == nil {
+	if err := p.AddItem(item.NewHelmet("Duplicate", 1)); err == nil {
 		t.Fatal("item must not reuse a transport number")
 	}
 	if len(p.Inventory()) != 1 || p.ItemCount() != 0 || p.TotalEnergy() != 0.5 {
 		t.Fatal("rejected additions changed park state")
 	}
-	if err := p.AddTransport(NewElectricBicycle("Repaired", 3, 0, 7)); err != nil {
+	if err := p.AddTransport(transport.NewElectricBicycle("Repaired", 3, 0, 7)); err != nil {
 		t.Fatalf("rejected transport must not reserve its number: %v", err)
 	}
 }
 
 func TestRegularServiceIdentityAndEnergy(t *testing.T) {
-	service := RegularService{}
-	invalid := []Transport{
-		NewBicycle("", 1, 7),
-		NewBicycle("Bike", 0, 7),
-		NewBicycle("Bike", -1, 7),
-		NewElectricBicycle("Electric", 1, -0.1, 7),
+	service := park.RegularService{}
+	invalid := []park.Transport{
+		transport.NewBicycle("", 1, 7),
+		transport.NewBicycle("Bike", 0, 7),
+		transport.NewBicycle("Bike", -1, 7),
+		transport.NewElectricBicycle("Electric", 1, -0.1, 7),
 	}
 	for _, vehicle := range invalid {
 		if service.Check(vehicle) {
 			t.Fatal("invalid transport passed inspection")
 		}
 	}
-	if !service.Check(NewElectricBicycle("Electric", 1, 0, 7)) {
+	if !service.Check(transport.NewElectricBicycle("Electric", 1, 0, 7)) {
 		t.Fatal("zero energy should be allowed")
 	}
-	if !service.Check(NewScooter("Scooter", 1, 0.5, 7)) {
+	if !service.Check(transport.NewScooter("Scooter", 1, 0.5, 7)) {
 		t.Fatal("valid scooter should pass inspection")
 	}
 }

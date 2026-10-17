@@ -1,9 +1,5 @@
 package park
 
-type ServiceCenter interface {
-	Check(t Transport) bool
-}
-
 type RegularService struct{}
 
 func (s RegularService) Check(t Transport) bool {

@@ -1,4 +1,4 @@
-package park
+package transport
 
 type ElectricBicycle struct {
 	name   string

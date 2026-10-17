@@ -3,7 +3,6 @@ package park
 import (
 	"errors"
 	"fmt"
-	"reflect"
 )
 
 type Park struct {
@@ -14,18 +13,6 @@ type Park struct {
 
 func NewPark(service ServiceCenter) *Park {
 	return &Park{service: service}
-}
-
-func isNil(value any) bool {
-	if value == nil {
-		return true
-	}
-	v := reflect.ValueOf(value)
-	switch v.Kind() {
-	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
-		return v.IsNil()
-	}
-	return false
 }
 
 func (p *Park) numberExists(number int) bool {

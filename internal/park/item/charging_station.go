@@ -1,4 +1,4 @@
-package park
+package item
 
 type ChargingStation struct {
 	name   string
