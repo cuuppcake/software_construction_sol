@@ -1,31 +1,32 @@
 package console
 
-import "fmt"
-
 func (c *Console) addStudent() error {
-	id, err := c.prompt("ID студента")
+	name, err := c.prompt("Имя студента")
 	if err != nil {
 		return err
 	}
-	name, err := c.prompt("Имя")
+	id, err := c.service.AddStudent(name)
 	if err != nil {
 		return err
 	}
-	return c.service.AddStudent(id, name)
+	return c.println("ID студента:", id)
 }
 
-func (c *Console) showStudents() {
+func (c *Console) showStudents() error {
 	students := c.service.Students()
 	if len(students) == 0 {
-		fmt.Fprintln(c.out, "Студентов пока нет.")
+		return c.println("Студентов пока нет.")
 	}
 	for _, student := range students {
-		fmt.Fprintf(c.out, "%s — %s\n", student.GetID(), student.GetName())
+		if err := c.printf("%s — %s\n", student.ID(), student.Name()); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (c *Console) renameStudent() error {
-	id, err := c.prompt("ID студента")
+	id, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
@@ -37,7 +38,7 @@ func (c *Console) renameStudent() error {
 }
 
 func (c *Console) removeStudent() error {
-	id, err := c.prompt("ID студента")
+	id, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}

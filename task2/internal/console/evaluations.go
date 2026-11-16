@@ -3,11 +3,11 @@ package console
 import "fmt"
 
 func (c *Console) grade() error {
-	studentID, err := c.prompt("ID студента")
+	studentID, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
-	criterionID, err := c.prompt("ID критерия")
+	criterionID, err := c.id("ID критерия")
 	if err != nil {
 		return err
 	}
@@ -19,11 +19,11 @@ func (c *Console) grade() error {
 }
 
 func (c *Console) cancelGrade() error {
-	studentID, err := c.prompt("ID студента")
+	studentID, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
-	criterionID, err := c.prompt("ID критерия")
+	criterionID, err := c.id("ID критерия")
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (c *Console) cancelGrade() error {
 }
 
 func (c *Console) showEvaluations() error {
-	studentID, err := c.prompt("ID студента")
+	studentID, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
@@ -40,16 +40,18 @@ func (c *Console) showEvaluations() error {
 		return err
 	}
 	if len(evaluations) == 0 {
-		fmt.Fprintln(c.out, "У студента пока нет оценок.")
+		return c.println("У студента пока нет оценок.")
 	}
 	for _, evaluation := range evaluations {
-		fmt.Fprintf(c.out, "%s — %d\n", evaluation.GetCriterionID(), evaluation.GetScore().GetPoints())
+		if err := c.printf("%s — %d\n", evaluation.CriterionID(), evaluation.Score().Points()); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func (c *Console) showResult() error {
-	studentID, err := c.prompt("ID студента")
+	studentID, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
@@ -57,12 +59,11 @@ func (c *Console) showResult() error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(c.out, "Итог: %.2f%%, оценено %d из %d критериев\n", result.GetPercent(), result.GetCompleted(), result.GetTotal())
-	return nil
+	return c.printf("Итог: %.2f%%, оценено %d из %d критериев\n", result.Percent(), result.Completed(), result.Total())
 }
 
 func (c *Console) exportResult() error {
-	studentID, err := c.prompt("ID студента")
+	studentID, err := c.id("ID студента")
 	if err != nil {
 		return err
 	}
@@ -76,6 +77,5 @@ func (c *Console) exportResult() error {
 	if err := c.service.ExportResult(studentID, path); err != nil {
 		return err
 	}
-	fmt.Fprintln(c.out, "Экспортировано в", path)
-	return nil
+	return c.println("Экспортировано в", path)
 }

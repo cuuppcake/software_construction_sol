@@ -1,38 +1,47 @@
 package domain
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Evaluation struct {
-	studentID   string
-	criterionID string
+	studentID   uuid.UUID
+	criterionID uuid.UUID
 	score       Score
 }
 
-func (e Evaluation) GetStudentID() string {
+func (e Evaluation) StudentID() uuid.UUID {
 	return e.studentID
 }
 
-func (e Evaluation) GetCriterionID() string {
+func (e Evaluation) CriterionID() uuid.UUID {
 	return e.criterionID
 }
 
-func (e Evaluation) GetScore() Score {
+func (e Evaluation) Score() Score {
 	return e.score
 }
 
 type EvaluationFactory struct{}
 
-func (f EvaluationFactory) Create(student Student, rubric *Rubric, criterionID string, points int) (Evaluation, error) {
-	if student.GetID() == "" || rubric == nil {
-		return Evaluation{}, fmt.Errorf("нужны студент и рубрикатор")
+func (f EvaluationFactory) Create(student Student, rubric *Rubric, criterionID uuid.UUID, points int) (Evaluation, error) {
+	if student.ID() == uuid.Nil || rubric == nil {
+		return Evaluation{}, errors.New("нужны студент и рубрикатор")
 	}
 	criterion, exists := rubric.Criterion(criterionID)
 	if !exists {
 		return Evaluation{}, fmt.Errorf("критерия %q нет в рубрикаторе", criterionID)
 	}
-	score, err := NewScore(points, criterion.GetMaxScore())
+	score, err := NewScore(points, criterion.MaxScore())
 	if err != nil {
 		return Evaluation{}, err
 	}
-	return Evaluation{studentID: student.GetID(), criterionID: criterionID, score: score}, nil
+	return Evaluation{
+		studentID:   student.ID(),
+		criterionID: criterionID,
+		score:       score,
+	}, nil
 }

@@ -3,32 +3,39 @@ package domain
 import (
 	"errors"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type Student struct {
-	id   string
+	id   uuid.UUID
 	name string
 }
 
-func NewStudent(id, name string) (Student, error) {
-	if strings.TrimSpace(id) == "" || strings.TrimSpace(name) == "" {
-		return Student{}, errors.New("ID и имя студента не должны быть пустыми")
+func NewStudent(name string) (Student, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return Student{}, errors.New("имя студента не должно быть пустым")
 	}
-	return Student{id: strings.TrimSpace(id), name: strings.TrimSpace(name)}, nil
+	return Student{
+		id:   uuid.New(),
+		name: name,
+	}, nil
 }
 
-func (s Student) GetID() string {
+func (s Student) ID() uuid.UUID {
 	return s.id
 }
 
-func (s Student) GetName() string {
+func (s Student) Name() string {
 	return s.name
 }
 
 func (s *Student) Rename(name string) error {
-	if strings.TrimSpace(name) == "" {
+	name = strings.TrimSpace(name)
+	if name == "" {
 		return errors.New("имя студента не должно быть пустым")
 	}
-	s.name = strings.TrimSpace(name)
+	s.name = name
 	return nil
 }

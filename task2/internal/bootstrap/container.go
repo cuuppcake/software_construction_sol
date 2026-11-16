@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"fmt"
 	"pos/internal/app"
-	"pos/internal/domain"
+	"pos/internal/calculation"
 	"pos/internal/export"
 	"pos/internal/storage"
 )
@@ -13,16 +13,16 @@ type Container struct {
 }
 
 func NewContainer(policyName string) (*Container, error) {
-	var policy domain.ResultPolicy
+	var policy calculation.ResultPolicy
 	switch policyName {
 	case "weighted":
-		policy = domain.WeightedPolicy{}
+		policy = calculation.WeightedPolicy{}
 	case "equal":
-		policy = domain.EqualPolicy{}
+		policy = calculation.EqualPolicy{}
 	default:
 		return nil, fmt.Errorf("неизвестное правило расчёта итога %q", policyName)
 	}
 	store := storage.NewMemoryStore()
-	service := app.NewService(store, store, store, export.CSVExporter{}, domain.NewCalculator(policy))
+	service := app.NewService(store, store, store, export.CSVExporter{}, calculation.NewCalculator(policy))
 	return &Container{Service: service}, nil
 }

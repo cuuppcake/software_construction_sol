@@ -1,11 +1,19 @@
 package console
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 func (c *Console) saveCriterion(update bool) error {
-	id, err := c.prompt("ID критерия")
-	if err != nil {
-		return err
+	var id uuid.UUID
+	var err error
+	if update {
+		id, err = c.id("ID критерия")
+		if err != nil {
+			return err
+		}
 	}
 	name, err := c.prompt("Название")
 	if err != nil {
@@ -15,28 +23,35 @@ func (c *Console) saveCriterion(update bool) error {
 	if err != nil {
 		return err
 	}
-	weight, err := c.decimal("Вес (например, 0.5)")
+	weight, err := c.integer("Вес (например, 50)")
 	if err != nil {
 		return err
 	}
 	if update {
 		return c.service.UpdateCriterion(id, name, maxScore, weight)
 	}
-	return c.service.AddCriterion(id, name, maxScore, weight)
+	id, err = c.service.AddCriterion(name, maxScore, weight)
+	if err != nil {
+		return err
+	}
+	return c.println("ID критерия:", id)
 }
 
-func (c *Console) showCriteria() {
+func (c *Console) showCriteria() error {
 	criteria := c.service.Criteria()
 	if len(criteria) == 0 {
-		fmt.Fprintln(c.out, "Критериев пока нет.")
+		return c.println("Критериев пока нет.")
 	}
 	for _, criterion := range criteria {
-		fmt.Fprintf(c.out, "%s — %s, максимум %d, вес %.2f\n", criterion.GetID(), criterion.GetName(), criterion.GetMaxScore(), criterion.GetWeight())
+		if _, err := fmt.Fprintf(c.out, "%s — %s, максимум %d, вес %d\n", criterion.ID(), criterion.Name(), criterion.MaxScore(), criterion.Weight()); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (c *Console) removeCriterion() error {
-	id, err := c.prompt("ID критерия")
+	id, err := c.id("ID критерия")
 	if err != nil {
 		return err
 	}

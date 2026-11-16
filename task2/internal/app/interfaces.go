@@ -1,25 +1,29 @@
 package app
 
-import "pos/internal/domain"
+import (
+	"pos/internal/domain"
+
+	"github.com/google/uuid"
+)
 
 type StudentRepository interface {
-	Get(id string) (domain.Student, bool)
+	Get(id uuid.UUID) (domain.Student, bool)
 	List() []domain.Student
 	Save(student domain.Student)
-	Delete(id string)
+	Delete(id uuid.UUID)
 }
 
 type RubricRepository interface {
-	GetRubric() *domain.Rubric
+	Rubric() *domain.Rubric
 	SaveRubric(rubric *domain.Rubric)
 }
 
 type EvaluationRepository interface {
-	ListByStudent(studentID string) []domain.Evaluation
-	ListByCriterion(criterionID string) []domain.Evaluation
+	ListByStudent(studentID uuid.UUID) []domain.Evaluation
+	ListByCriterion(criterionID uuid.UUID) []domain.Evaluation
 	SaveEvaluation(evaluation domain.Evaluation)
-	DeleteEvaluation(studentID, criterionID string) bool
-	DeleteByStudent(studentID string)
+	DeleteEvaluation(studentID, criterionID uuid.UUID) bool
+	DeleteByStudent(studentID uuid.UUID)
 }
 
 type ResultExporter interface {

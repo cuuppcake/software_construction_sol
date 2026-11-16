@@ -1,42 +1,44 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 type Rubric struct {
-	criteria map[string]Criterion
-	order    []string
+	criteria map[uuid.UUID]Criterion
+	order    []uuid.UUID
 }
 
 func NewRubric() *Rubric {
-	return &Rubric{criteria: make(map[string]Criterion)}
+	return &Rubric{criteria: make(map[uuid.UUID]Criterion)}
 }
 
-func (r *Rubric) Add(c Criterion) error {
-	criterion, err := NewCriterion(c.GetID(), c.GetName(), c.GetMaxScore(), c.GetWeight())
-	if err != nil {
+func (r *Rubric) Add(criterion Criterion) error {
+	if err := criterion.valid(); err != nil {
 		return err
 	}
-	if _, exists := r.criteria[criterion.GetID()]; exists {
-		return fmt.Errorf("критерий %q уже существует", criterion.GetID())
+	if _, exists := r.criteria[criterion.ID()]; exists {
+		return fmt.Errorf("критерий %q уже существует", criterion.ID())
 	}
-	r.criteria[criterion.GetID()] = criterion
-	r.order = append(r.order, criterion.GetID())
+	r.criteria[criterion.ID()] = criterion
+	r.order = append(r.order, criterion.ID())
 	return nil
 }
 
-func (r *Rubric) Replace(c Criterion) error {
-	criterion, err := NewCriterion(c.GetID(), c.GetName(), c.GetMaxScore(), c.GetWeight())
-	if err != nil {
+func (r *Rubric) Replace(criterion Criterion) error {
+	if err := criterion.valid(); err != nil {
 		return err
 	}
-	if _, exists := r.criteria[criterion.GetID()]; !exists {
-		return fmt.Errorf("критерий %q не найден", criterion.GetID())
+	if _, exists := r.criteria[criterion.ID()]; !exists {
+		return fmt.Errorf("критерий %q не найден", criterion.ID())
 	}
-	r.criteria[criterion.GetID()] = criterion
+	r.criteria[criterion.ID()] = criterion
 	return nil
 }
 
-func (r *Rubric) Remove(id string) error {
+func (r *Rubric) Remove(id uuid.UUID) error {
 	if _, exists := r.criteria[id]; !exists {
 		return fmt.Errorf("критерий %q не найден", id)
 	}
@@ -50,9 +52,9 @@ func (r *Rubric) Remove(id string) error {
 	return nil
 }
 
-func (r *Rubric) Criterion(id string) (Criterion, bool) {
-	c, ok := r.criteria[id]
-	return c, ok
+func (r *Rubric) Criterion(id uuid.UUID) (Criterion, bool) {
+	criterion, exists := r.criteria[id]
+	return criterion, exists
 }
 
 func (r *Rubric) List() []Criterion {
@@ -66,8 +68,8 @@ func (r *Rubric) List() []Criterion {
 func (r *Rubric) Clone() *Rubric {
 	clone := NewRubric()
 	clone.order = append(clone.order, r.order...)
-	for id, c := range r.criteria {
-		clone.criteria[id] = c
+	for id, criterion := range r.criteria {
+		clone.criteria[id] = criterion
 	}
 	return clone
 }

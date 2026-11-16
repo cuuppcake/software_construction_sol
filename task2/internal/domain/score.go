@@ -13,6 +13,6 @@ func NewScore(points, maxScore int) (Score, error) {
 	return Score{points: points}, nil
 }
 
-func (s Score) GetPoints() int {
+func (s Score) Points() int {
 	return s.points
 }
